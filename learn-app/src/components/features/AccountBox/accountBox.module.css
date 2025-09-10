@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer components {
+    .userMenuWrapper {
+        @apply relative;
+    }
+
+    .accountBoxWrapper {
+        @apply absolute right-0 top-1 w-64 bg-(--color-bg) rounded-xl shadow-(--box-shadow-card-100);
+    }
+
+    .menuDivider {
+        @apply border-b border-solid border-(--color-basic-300) transform rotate-[0.22deg];
+    }
+
+    .menuSection {
+        @apply space-y-3 pb-35;
+    }
+}

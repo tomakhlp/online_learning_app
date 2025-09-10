@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer components {
+    .userInfo {
+        @apply mr-auto flex items-center p-3 flex-wrap gap-2;
+    }
+
+    .userAvatar {
+        @apply rounded-full w-[51px] h-[51px] bg-[var(--color-image-100)] object-cover overflow-hidden;
+    }
+
+    .userName {
+        @apply text-sm leading-[22px] font-bold;
+    }
+
+    .userEmail {
+        @apply text-(--color-body-200) text-xs leading-5;
+    }
+
+    .userDetails {
+        @apply flex flex-col flex-1;
+    }
+}

@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@layer components {
+    .footer {
+        @apply bg-gray-50 text-gray-800;
+    }
+
+    .button {
+        @apply bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-800;
+    }
+
+}

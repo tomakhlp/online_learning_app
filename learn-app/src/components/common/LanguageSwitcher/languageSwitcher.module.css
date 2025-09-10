@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@layer components {
+    .switcherBtn {
+        @apply flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-basic-200;
+    }
+
+    .dropdown {
+        @apply absolute right-0 bottom-full mb-1 w-40 rounded-md shadow-(--box-shadow-card-100) bg-bg border z-10 transform transition-all duration-200 origin-bottom;
+    }
+
+    .dropdownVisible {
+        @apply opacity-100 scale-100 pointer-events-auto;
+    }
+
+    .dropdownHidden {
+        @apply opacity-0 scale-95 pointer-events-none;
+    }
+
+    .dropdownItem {
+        @apply w-full text-left px-4 py-2 text-sm hover:bg-basic-200;
+    }
+
+    .dropdownItemActive {
+        @apply bg-basic-200 font-semibold;
+    }
+}

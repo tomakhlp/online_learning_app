@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer components {
+    .menuNav {
+        @apply flex flex-col items-start space-y-6;
+    }
+
+    .menuNavDesktop {
+        @apply hidden md:flex items-center space-x-6 text-(--color-body-200);
+    }
+
+    .menuNavLinks {
+        @apply hover:text-(--color-primary-100) hover:border-l-4 hover:border-[var(--color-primary-100)] active:text-[var(--color-primary-100)] active:border-l-4 active:border-[var(--color-primary-100)] px-2 py-1 transition-all;
+    }
+
+    .menuNavLinksDesktop {
+        @apply hover:text-(--color-primary-100) border-none;
+    }
+
+    .navLinkActive {
+        @apply font-bold text-(--color-primary-100) border-l-4 border-[var(--color-primary-100)];
+    }
+}

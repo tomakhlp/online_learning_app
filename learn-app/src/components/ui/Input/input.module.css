@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@layer components {
+    .inputWrapper {
+        @apply flex flex-col w-full;
+    }
+
+    .input {
+        @apply leading-7 flex items-center border px-[16px] rounded-md w-full h-[44px];
+    }
+
+    .label {
+        @apply font-bold leading-7;
+    }
+
+    .inputIcon {
+        @apply mr-2 align-middle;
+    }
+
+    .inputEndIcon {
+        @apply ml-2;
+    }
+
+    .inputField {
+        @apply outline-none flex-1 bg-transparent min-w-0 placeholder-[var(--color-basic-350)] disabled:cursor-not-allowed;
+    }
+
+    .inputTextError {
+        @apply text-(--color-important-150) text-sm mt-1 flex flex-row items-center gap-1;
+    }
+}

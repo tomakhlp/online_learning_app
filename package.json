@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build-frontend": "cd learn-app && npm run build",
+    "build-server": "cd server && npm run build",
+    "deploy-server": "cd server && serverless deploy",
+    "deploy-frontend": "cd server && serverless s3sync",
+    "deploy-all": "npm run build-frontend && npm run build-server && npm run deploy-server && npm run deploy-frontend"
+  }
+}

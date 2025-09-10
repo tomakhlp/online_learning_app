@@ -1,0 +1,391 @@
+service: final-project
+
+plugins:
+  - serverless-offline
+  - serverless-s3-sync
+
+custom:
+  s3Sync:
+    - bucketName: final-project-users-photo-storage
+      localDir: ./assets
+    - bucketName: final-project-learn-app
+      localDir: ../learn-app/dist
+      params:
+        - index.html:
+            CacheControl: no-cache, must-revalidate
+        - '**/*.*':
+            CacheControl: max-age=31536000, immutable
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    USER_PHOTO_CLOUDFRONT_DOMAIN: !GetAtt UserPhotoCloudFrontDistribution.DomainName
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource:
+            - arn:aws:s3:::final-project-users-photo-storage
+            - arn:aws:s3:::final-project-users-photo-storage/*
+
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: arn:aws:dynamodb:us-east-1:331029743519:table/*
+
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "arn:aws:logs:us-east-1:*:*"
+  httpApi:
+    cors:
+      allowedOrigins:
+        - 'http://localhost:5173'
+        - 'http://localhost:5174'
+        - 'https://d2l137q0bywlg4.cloudfront.net'
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+
+functions:
+  api:
+    handler: dist/main.handler
+    timeout: 30
+    events:
+      - httpApi:
+          path: /{any+}
+          method: ANY
+
+resources:
+  Resources:
+    UserPhotoStorageBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: final-project-users-photo-storage
+        AccessControl: Private
+
+    UserPhotoBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref UserPhotoStorageBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+              Action:
+                - s3:GetObject
+              Resource: !Join ['', ['arn:aws:s3:::', !Ref UserPhotoStorageBucket, '/*']]
+
+    CloudFrontOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: OAI for user photos
+
+    UserPhotoCloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      DependsOn:
+        - UserPhotoBucketPolicy
+        - CloudFrontOriginAccessIdentity
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          Origins:
+            - Id: UserPhotoS3Origin
+              DomainName: !GetAtt UserPhotoStorageBucket.DomainName
+              S3OriginConfig:
+                OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+          DefaultCacheBehavior:
+            TargetOriginId: UserPhotoS3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+            MinTTL: 3600
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: true
+          HttpVersion: http2
+
+    ReactAppBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: final-project-learn-app
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          IgnorePublicAcls: false
+          BlockPublicPolicy: false
+          RestrictPublicBuckets: false
+
+    ReactAppBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref ReactAppBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action:
+                - s3:GetObject
+              Resource: !Join [ '', [ 'arn:aws:s3:::', !Ref ReactAppBucket, '/*' ] ]
+
+    ReactAppCloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      DependsOn:
+        - ReactAppBucketPolicy
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          Origins:
+            - Id: ReactAppS3Origin
+              DomainName: !Join
+                - ''
+                - - !Ref ReactAppBucket
+                  - '.s3-website-'
+                  - !Ref AWS::Region
+                  - '.amazonaws.com'
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: http-only
+          DefaultCacheBehavior:
+            TargetOriginId: ReactAppS3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+            MinTTL: 0
+            DefaultTTL: 3600
+            MaxTTL: 86400
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: true
+          HttpVersion: http2
+
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UserTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: firstName_ls
+            AttributeType: S
+          - AttributeName: lastName_ls
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: UsernameIndex
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: FirstNameLSIndex
+            KeySchema:
+              - AttributeName: firstName_ls
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: LastNameLSIndex
+            KeySchema:
+              - AttributeName: lastName_ls
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    StudentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: StudentTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    TrainerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TrainerTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: specializationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: SpecializationIdIndex
+            KeySchema:
+              - AttributeName: specializationId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    SpecializationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SpecializationTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: specialization
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: SpecializationIndex
+            KeySchema:
+              - AttributeName: specialization
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    TrainingTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TrainingTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: trainerId
+            AttributeType: S
+          - AttributeName: studentId
+            AttributeType: S
+          - AttributeName: date
+            AttributeType: N
+          - AttributeName: staticPartition
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: TrainerIdDateIndex
+            KeySchema:
+              - AttributeName: trainerId
+                KeyType: HASH
+              - AttributeName: date
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: StudentIdDateIndex
+            KeySchema:
+              - AttributeName: studentId
+                KeyType: HASH
+              - AttributeName: date
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: DateIndex
+            KeySchema:
+              - AttributeName: staticPartition
+                KeyType: HASH
+              - AttributeName: date
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    TrainingTypeTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TrainingTypeTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+  Outputs:
+    ReactAppCloudFrontDomainName:
+      Description: "CloudFront domain name for the frontend application"
+      Value: !GetAtt ReactAppCloudFrontDistribution.DomainName
+
+    UserPhotoCloudFrontDomainName:
+      Description: "CloudFront domain name for user avatars storage"
+      Value: !GetAtt UserPhotoCloudFrontDistribution.DomainName
+
+    HttpApi:
+      Description: "Reference to the created HTTP API"
+      Value: !Ref HttpApi
+
+    ApiGatewayUrl:
+      Description: "HTTP API Gateway URL for backend"
+      Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"

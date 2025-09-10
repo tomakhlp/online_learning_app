@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@layer components {
+    .loginForm {
+        @apply space-y-4 w-full;
+    }
+}

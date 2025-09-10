@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --color-bg: #FFFFFFFF;
+
+    --color-body-100: #171A1FFF;
+    --color-body-150: #6E7787FF;
+    --color-body-200: #565E6CFF;
+    --color-body-250: #424955FF;
+    --color-body-300: #9095A0FF;
+    --color-body-350: #323842FF;
+
+    --color-basic-100: #FAFAFBFF;
+    --color-basic-150: #F8F9FAFF;
+    --color-basic-200: #F3F4F6FF;
+    --color-basic-250: #EAECEEFF;
+    --color-basic-300: #DEE1E6FF;
+    --color-basic-350: #BCC1CAFF;
+
+    --color-primary-100: #6355D8FF;
+    --color-primary-150: #4d3ed3FF;
+    --color-primary-200: #3d2dc7FF;
+
+    --color-secondary-100: #60CFA5FF;
+    --color-secondary-150: #36B584FF;
+    --color-secondary-200: #2F9C72FF;
+
+    --color-important-100: #ED5D56FF;
+    --color-important-150: #F22128FF;
+    --color-important-200: #B90B11FF;
+
+    --color-image-100: #CFCBF3FF;
+    --color-success-100: #17A948FF;
+    --color-badge-100: #E16DDEFF;
+    --color-icon-100: #1DD75BFF;
+
+    --font-family-heading: "Montserrat";
+    --font-family-body: "Poppins";
+
+    --box-shadow-card-100: 0px 4px 9px rgba(23, 26, 31, 0.12), 0px 0px 2px rgba(23, 26, 31, 0.16);
+    --box-shadow-card-150: 0px 0px 1px rgba(23, 26, 31, 0.12), 0px 0px 2px rgba(23, 26, 31, 0.16);
+}
+
+.dark {
+    --color-bg: #212121ff;
+
+    --color-body-100: #f9fafbff;
+    --color-body-150: #d6d6d6ff;
+    --color-body-200: #b8b8b8ff;
+    --color-body-250: #9a9a9aff;
+    --color-body-300: #888888ff;
+    --color-body-350: #6e6e6eff;
+
+    --color-basic-100: #292929ff;
+    --color-basic-150: #333333ff;
+    --color-basic-200: #383838ff;
+    --color-basic-250: #444444ff;
+    --color-basic-300: #505050ff;
+    --color-basic-350: #5c5c5cff;
+
+    --color-primary-100: #6355D8FF;
+    --color-primary-150: #4d3ed3FF;
+    --color-primary-200: #3d2dc7FF;
+
+    --color-secondary-100: #60CFA5FF;
+    --color-secondary-150: #36B584FF;
+    --color-secondary-200: #2F9C72FF;
+
+    --color-important-100: #ED5D56FF;
+    --color-important-150: #F22128FF;
+    --color-important-200: #B90B11FF;
+
+    --color-image-100: #3e3a61ff;
+    --color-success-100: #00d264ff;
+    --color-badge-100: #f58cf2ff;
+    --color-icon-100: #6ff9a2ff;
+
+    --box-shadow-card-100: 0px 4px 9px rgba(255, 255, 255, 0.1), 0px 0px 2px rgba(255, 255, 255, 0.16);
+    --box-shadow-card-150: 0px 0px 1px rgba(255, 255, 255, 0.1), 0px 0px 2px rgba(255, 255, 255, 0.16);
+}
+
+
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    scroll-behavior: smooth;
+}
+
+html {
+    @apply text-base bg-bg;
+    box-sizing: border-box;
+}
+
+body {
+    @apply bg-bg;
+    font-family: var(--font-family-body), sans-serif;
+    color: var(--color-body-100);
+    transition: background-color 0.3s ease
+}
+
+.heading {
+    @apply text-[48px] sm:text-[56px] leading-[56px] sm:leading-[78px] font-bold font-family-heading text-center;
+}
+
+.subheading {
+    @apply text-[36px] sm:text-[48px] leading-[44px] sm:leading-[68px] font-bold font-family-heading text-center;
+}
+
+.tertiary-heading {
+    @apply text-xl leading-7 text-center text-body-300 max-w-3xl pb-7;
+}
+
+.MuiStack-root > :not(style) ~ :not(style) {
+    margin-top: 0 !important;
+}

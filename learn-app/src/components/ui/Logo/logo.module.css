@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@layer components {
+    .logoGroup {
+        @apply absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center;
+    }
+
+    .logoImg {
+        @apply w-12 h-10 text-(--color-primary-100);
+    }
+
+    .logoText {
+        @apply font-bold text-[2rem];
+        font-family: var(--font-family-heading), sans-serif;
+    }
+}

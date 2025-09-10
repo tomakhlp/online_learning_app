@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@layer components {
+    .loginWrapper {
+        @apply flex flex-col items-center justify-center w-full max-w-sm px-7 py-2 gap-3 overflow-hidden;
+    }
+
+    .loginHeading {
+        @apply text-[2rem] font-bold;
+    }
+
+    .loginSubheading {
+        @apply text-xl mb-3 text-(--color-body-200);
+    }
+
+    .orText {
+        @apply text-xs text-(--color-body-150) font-bold py-2;
+    }
+
+    .signUpText {
+        @apply text-sm;
+    }
+
+    .signUpLink {
+        @apply text-sm text-(--color-primary-100) font-bold;
+    }
+
+    .captchaWrapper {
+        @apply flex items-center justify-center flex-col;
+    }
+
+    .captchaErrorText {
+        @apply text-(--color-important-150) text-sm;
+    }
+}

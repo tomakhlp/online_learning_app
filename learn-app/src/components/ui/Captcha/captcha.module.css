@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@layer components {
+    .captchaWrapper {
+        @apply flex justify-center items-center scale-75 origin-center z-0;
+    }
+
+}

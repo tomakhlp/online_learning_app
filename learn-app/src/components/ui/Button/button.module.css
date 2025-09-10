@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer components {
+    .btn {
+        @apply flex whitespace-normal break-words text-white items-center justify-center px-4 py-2 rounded-md cursor-pointer transition-all duration-200 ease-in-out disabled:opacity-40 disabled:cursor-not-allowed;
+    }
+
+    .btnPrimary {
+        @apply bg-[var(--color-primary-100)] hover:bg-[var(--color-primary-150)] active:bg-[var(--color-primary-200)];
+    }
+
+    .btnSecondary {
+        @apply bg-[var(--color-secondary-100)] hover:bg-[var(--color-secondary-150)] active:bg-[var(--color-secondary-200)];
+    }
+
+    .btnImportant {
+        @apply bg-[var(--color-important-100)] hover:bg-[var(--color-important-150)] active:bg-[var(--color-important-200)];
+    }
+
+    .btnTransparent {
+        @apply bg-transparent text-(--color-primary-100) hover:bg-[var(--color-basic-150)] active:bg-[var(--color-basic-150)];
+    }
+
+}

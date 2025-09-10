@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@layer components {
+    .headerWrapper {
+        @apply sticky top-0 w-full flex items-center px-4 py-2 justify-between bg-(--color-bg) border-b-1 rounded-md border-(--color-basic-300) z-30;
+    }
+
+    .headerLeft {
+        @apply relative flex md:w-auto w-full items-center md:gap-8;
+    }
+
+    .headerRight {
+        @apply hidden md:flex;
+    }
+
+    .headerIcon {
+        @apply w-6 h-6;
+    }
+
+    .menuOverlay {
+        @apply fixed md:hidden bg-(--color-bg) shadow-(--box-shadow-card-100) flex flex-col top-0 left-0 w-3/4 h-full p-2 z-50 transition-transform duration-300 ease-in-out transform;
+    }
+
+    .menuHeader {
+        @apply flex flex-row-reverse justify-start items-center w-full mb-8 flex-wrap;
+    }
+
+    .menuFooter {
+        @apply mt-auto flex flex-col items-start gap-7;
+    }
+}
+

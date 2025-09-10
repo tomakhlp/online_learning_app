@@ -1,0 +1,37 @@
+export const GLOBAL_TEXT = {
+    COMMON: {
+        BLOG: "Blog",
+        FEATURES: "Features",
+        PRICING: "Pricing",
+        USER_GUIDES: "User guides",
+        WEBINARS: "Webinars",
+        ABOUT_US: "About us",
+        CONTACT_US: "Contact us",
+        MY_ACCOUNT: "My Account",
+        SIGN_IN: "Sign in",
+        SIGN_UP: "Sign up",
+        ADD_TRAINER: "Add trainer",
+        TRAININGS: "Trainings",
+        ADD_TRAINING: 'Add training',
+        CHANGE_PASSWORD: "Change password",
+        JOIN_US: "Join us",
+        REGISTRATION: "Registration",
+        NIGHT_MODE: "Night mode",
+        TIME_TO_READ: "{{timeToRead}} mins read",
+        NAME: "Name",
+        STATUS: 'Status',
+        ACTIVE: "Active",
+        NOT_ACTIVE: "Not active",
+        TRAINING_NAME: 'Training Name',
+        TRAINER_NAME: 'Trainer Name',
+        STUDENT_NAME: 'Student Name',
+        DURATION: "Duration",
+        SPECIALIZATION: 'Specialization'
+    },
+    HEADING: {
+        MY_TRAININGS: "My Trainings",
+        MY_STUDENTS: "My Students",
+        MY_TRAINERS: "My Trainers",
+        ALL_TRAINERS: "All Trainers",
+    }
+};

@@ -1,0 +1,1590 @@
+{
+  "service": {
+    "service": "final-project",
+    "serviceObject": {
+      "name": "final-project"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs20.x",
+      "region": "us-east-1",
+      "environment": {
+        "USER_PHOTO_CLOUDFRONT_DOMAIN": {
+          "Fn::GetAtt": [
+            "UserPhotoCloudFrontDistribution",
+            "DomainName"
+          ]
+        }
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": [
+                "arn:aws:s3:::final-project-users-photo-storage",
+                "arn:aws:s3:::final-project-users-photo-storage/*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+              ],
+              "Resource": "arn:aws:dynamodb:us-east-1:331029743519:table/*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:us-east-1:*:*"
+            }
+          ]
+        }
+      },
+      "httpApi": {
+        "cors": {
+          "allowedOrigins": [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "https://d2l137q0bywlg4.cloudfront.net"
+          ],
+          "allowedMethods": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "OPTIONS"
+          ],
+          "allowedHeaders": [
+            "Content-Type",
+            "Authorization"
+          ]
+        }
+      },
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ApiLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/final-project-dev-api"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "final-project",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/final-project-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/final-project-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][1]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][2]"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "final-project",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "ApiLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-5c00ea54-b962",
+                "S3Key": "serverless/final-project/dev/1751294456652-2025-06-30T14:40:56.652Z/final-project.zip"
+              },
+              "Handler": "dist/main.handler",
+              "Runtime": "nodejs20.x",
+              "FunctionName": "final-project-dev-api",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Environment": {
+                "Variables": {
+                  "USER_PHOTO_CLOUDFRONT_DOMAIN": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"USER_PHOTO_CLOUDFRONT_DOMAIN\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ApiLogGroup"
+            ]
+          },
+          "ApiLambdaVersionP22aUVDjczoOKWQq2l1ZbARl7INe1sL8WZwhrdvY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ApiLambdaFunction"
+              },
+              "CodeSha256": "gdFbb52MDzyB7v2HmYk57bnjwakZZslipJ2sIId5xlM="
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-final-project",
+              "ProtocolType": "HTTP",
+              "CorsConfiguration": {
+                "AllowHeaders": [
+                  "Content-Type",
+                  "Authorization"
+                ],
+                "AllowMethods": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "PATCH",
+                  "OPTIONS"
+                ],
+                "AllowOrigins": [
+                  "http://localhost:5173",
+                  "http://localhost:5174",
+                  "https://d2l137q0bywlg4.cloudfront.net"
+                ]
+              }
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "ApiLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ApiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationApi": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"ApiLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteAnyAnyVar": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "ANY /{any+}",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationApi"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationApi"
+          },
+          "UserPhotoStorageBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "final-project-users-photo-storage",
+              "AccessControl": "Private"
+            }
+          },
+          "UserPhotoBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "UserPhotoStorageBucket"
+              },
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "CanonicalUser": {
+                        "Fn::GetAtt": [
+                          "CloudFrontOriginAccessIdentity",
+                          "S3CanonicalUserId"
+                        ]
+                      }
+                    },
+                    "Action": [
+                      "s3:GetObject"
+                    ],
+                    "Resource": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "UserPhotoStorageBucket"
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "CloudFrontOriginAccessIdentity": {
+            "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+            "Properties": {
+              "CloudFrontOriginAccessIdentityConfig": {
+                "Comment": "OAI for user photos"
+              }
+            }
+          },
+          "UserPhotoCloudFrontDistribution": {
+            "Type": "AWS::CloudFront::Distribution",
+            "DependsOn": [
+              "UserPhotoBucketPolicy",
+              "CloudFrontOriginAccessIdentity"
+            ],
+            "Properties": {
+              "DistributionConfig": {
+                "Enabled": true,
+                "Origins": [
+                  {
+                    "Id": "UserPhotoS3Origin",
+                    "DomainName": {
+                      "Fn::GetAtt": [
+                        "UserPhotoStorageBucket",
+                        "DomainName"
+                      ]
+                    },
+                    "S3OriginConfig": {
+                      "OriginAccessIdentity": {
+                        "Fn::Sub": "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+                      }
+                    }
+                  }
+                ],
+                "DefaultCacheBehavior": {
+                  "TargetOriginId": "UserPhotoS3Origin",
+                  "ViewerProtocolPolicy": "redirect-to-https",
+                  "AllowedMethods": [
+                    "GET",
+                    "HEAD"
+                  ],
+                  "CachedMethods": [
+                    "GET",
+                    "HEAD"
+                  ],
+                  "ForwardedValues": {
+                    "QueryString": false,
+                    "Cookies": {
+                      "Forward": "none"
+                    }
+                  },
+                  "MinTTL": 3600
+                },
+                "ViewerCertificate": {
+                  "CloudFrontDefaultCertificate": true
+                },
+                "HttpVersion": "http2"
+              }
+            }
+          },
+          "ReactAppBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "final-project-learn-app",
+              "WebsiteConfiguration": {
+                "IndexDocument": "index.html",
+                "ErrorDocument": "index.html"
+              },
+              "PublicAccessBlockConfiguration": {
+                "BlockPublicAcls": false,
+                "IgnorePublicAcls": false,
+                "BlockPublicPolicy": false,
+                "RestrictPublicBuckets": false
+              }
+            }
+          },
+          "ReactAppBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ReactAppBucket"
+              },
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": [
+                      "s3:GetObject"
+                    ],
+                    "Resource": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "ReactAppBucket"
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ReactAppCloudFrontDistribution": {
+            "Type": "AWS::CloudFront::Distribution",
+            "DependsOn": [
+              "ReactAppBucketPolicy"
+            ],
+            "Properties": {
+              "DistributionConfig": {
+                "Enabled": true,
+                "Origins": [
+                  {
+                    "Id": "ReactAppS3Origin",
+                    "DomainName": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Ref": "ReactAppBucket"
+                          },
+                          ".s3-website-",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ".amazonaws.com"
+                        ]
+                      ]
+                    },
+                    "CustomOriginConfig": {
+                      "HTTPPort": 80,
+                      "HTTPSPort": 443,
+                      "OriginProtocolPolicy": "http-only"
+                    }
+                  }
+                ],
+                "DefaultCacheBehavior": {
+                  "TargetOriginId": "ReactAppS3Origin",
+                  "ViewerProtocolPolicy": "redirect-to-https",
+                  "AllowedMethods": [
+                    "GET",
+                    "HEAD"
+                  ],
+                  "CachedMethods": [
+                    "GET",
+                    "HEAD"
+                  ],
+                  "ForwardedValues": {
+                    "QueryString": false,
+                    "Cookies": {
+                      "Forward": "none"
+                    }
+                  },
+                  "MinTTL": 0,
+                  "DefaultTTL": 3600,
+                  "MaxTTL": 86400
+                },
+                "ViewerCertificate": {
+                  "CloudFrontDefaultCertificate": true
+                },
+                "HttpVersion": "http2"
+              }
+            }
+          },
+          "UserTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UserTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "email",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "username",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "firstName_ls",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "lastName_ls",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST",
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "EmailIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "email",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "UsernameIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "username",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "FirstNameLSIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "firstName_ls",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "LastNameLSIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "lastName_ls",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "StudentTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "StudentTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "userId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST",
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "UserIdIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "userId",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "TrainerTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "TrainerTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "userId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "specializationId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST",
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "UserIdIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "userId",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "SpecializationIdIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "specializationId",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "SpecializationTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "SpecializationTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "specialization",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST",
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "SpecializationIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "specialization",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "TrainingTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "TrainingTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "trainerId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "studentId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "date",
+                  "AttributeType": "N"
+                },
+                {
+                  "AttributeName": "staticPartition",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST",
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "TrainerIdDateIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "trainerId",
+                      "KeyType": "HASH"
+                    },
+                    {
+                      "AttributeName": "date",
+                      "KeyType": "RANGE"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "StudentIdDateIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "studentId",
+                      "KeyType": "HASH"
+                    },
+                    {
+                      "AttributeName": "date",
+                      "KeyType": "RANGE"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "DateIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "staticPartition",
+                      "KeyType": "HASH"
+                    },
+                    {
+                      "AttributeName": "date",
+                      "KeyType": "RANGE"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "TrainingTypeTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "TrainingTypeTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-5c00ea54-b962",
+            "Export": {
+              "Name": "sls-final-project-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "ApiLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ApiLambdaVersionP22aUVDjczoOKWQq2l1ZbARl7INe1sL8WZwhrdvY"
+            },
+            "Export": {
+              "Name": "sls-final-project-dev-ApiLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-final-project-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-final-project-dev-HttpApiUrl"
+            }
+          },
+          "ReactAppCloudFrontDomainName": {
+            "Description": "CloudFront domain name for the frontend application",
+            "Value": {
+              "Fn::GetAtt": [
+                "ReactAppCloudFrontDistribution",
+                "DomainName"
+              ]
+            }
+          },
+          "UserPhotoCloudFrontDomainName": {
+            "Description": "CloudFront domain name for user avatars storage",
+            "Value": {
+              "Fn::GetAtt": [
+                "UserPhotoCloudFrontDistribution",
+                "DomainName"
+              ]
+            }
+          },
+          "HttpApi": {
+            "Description": "Reference to the created HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            }
+          },
+          "ApiGatewayUrl": {
+            "Description": "HTTP API Gateway URL for backend",
+            "Value": {
+              "Fn::Sub": "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "s3Sync": [
+        {
+          "bucketName": "final-project-users-photo-storage",
+          "localDir": "./assets"
+        },
+        {
+          "bucketName": "final-project-learn-app",
+          "localDir": "../learn-app/dist",
+          "params": [
+            {
+              "index.html": {
+                "CacheControl": "no-cache, must-revalidate"
+              }
+            },
+            {
+              "**/*.*": {
+                "CacheControl": "max-age=31536000, immutable"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "plugins": [
+      "serverless-offline",
+      "serverless-s3-sync"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "api": {
+        "handler": "dist/main.handler",
+        "timeout": 30,
+        "events": [
+          {
+            "httpApi": {
+              "path": "/{any+}",
+              "method": "ANY"
+            },
+            "resolvedMethod": "ANY",
+            "resolvedPath": "/{any+}"
+          }
+        ],
+        "name": "final-project-dev-api",
+        "package": {},
+        "memory": 1024,
+        "runtime": "nodejs20.x",
+        "vpc": {},
+        "versionLogicalId": "ApiLambdaVersionP22aUVDjczoOKWQq2l1ZbARl7INe1sL8WZwhrdvY"
+      }
+    },
+    "resources": {
+      "Resources": {
+        "UserPhotoStorageBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "final-project-users-photo-storage",
+            "AccessControl": "Private"
+          }
+        },
+        "UserPhotoBucketPolicy": {
+          "Type": "AWS::S3::BucketPolicy",
+          "Properties": {
+            "Bucket": {
+              "Ref": "UserPhotoStorageBucket"
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "CanonicalUser": {
+                      "Fn::GetAtt": [
+                        "CloudFrontOriginAccessIdentity",
+                        "S3CanonicalUserId"
+                      ]
+                    }
+                  },
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:s3:::",
+                        {
+                          "Ref": "UserPhotoStorageBucket"
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "CloudFrontOriginAccessIdentity": {
+          "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+          "Properties": {
+            "CloudFrontOriginAccessIdentityConfig": {
+              "Comment": "OAI for user photos"
+            }
+          }
+        },
+        "UserPhotoCloudFrontDistribution": {
+          "Type": "AWS::CloudFront::Distribution",
+          "DependsOn": [
+            "UserPhotoBucketPolicy",
+            "CloudFrontOriginAccessIdentity"
+          ],
+          "Properties": {
+            "DistributionConfig": {
+              "Enabled": true,
+              "Origins": [
+                {
+                  "Id": "UserPhotoS3Origin",
+                  "DomainName": {
+                    "Fn::GetAtt": [
+                      "UserPhotoStorageBucket",
+                      "DomainName"
+                    ]
+                  },
+                  "S3OriginConfig": {
+                    "OriginAccessIdentity": {
+                      "Fn::Sub": "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+                    }
+                  }
+                }
+              ],
+              "DefaultCacheBehavior": {
+                "TargetOriginId": "UserPhotoS3Origin",
+                "ViewerProtocolPolicy": "redirect-to-https",
+                "AllowedMethods": [
+                  "GET",
+                  "HEAD"
+                ],
+                "CachedMethods": [
+                  "GET",
+                  "HEAD"
+                ],
+                "ForwardedValues": {
+                  "QueryString": false,
+                  "Cookies": {
+                    "Forward": "none"
+                  }
+                },
+                "MinTTL": 3600
+              },
+              "ViewerCertificate": {
+                "CloudFrontDefaultCertificate": true
+              },
+              "HttpVersion": "http2"
+            }
+          }
+        },
+        "ReactAppBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "final-project-learn-app",
+            "WebsiteConfiguration": {
+              "IndexDocument": "index.html",
+              "ErrorDocument": "index.html"
+            },
+            "PublicAccessBlockConfiguration": {
+              "BlockPublicAcls": false,
+              "IgnorePublicAcls": false,
+              "BlockPublicPolicy": false,
+              "RestrictPublicBuckets": false
+            }
+          }
+        },
+        "ReactAppBucketPolicy": {
+          "Type": "AWS::S3::BucketPolicy",
+          "Properties": {
+            "Bucket": {
+              "Ref": "ReactAppBucket"
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:s3:::",
+                        {
+                          "Ref": "ReactAppBucket"
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "ReactAppCloudFrontDistribution": {
+          "Type": "AWS::CloudFront::Distribution",
+          "DependsOn": [
+            "ReactAppBucketPolicy"
+          ],
+          "Properties": {
+            "DistributionConfig": {
+              "Enabled": true,
+              "Origins": [
+                {
+                  "Id": "ReactAppS3Origin",
+                  "DomainName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Ref": "ReactAppBucket"
+                        },
+                        ".s3-website-",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com"
+                      ]
+                    ]
+                  },
+                  "CustomOriginConfig": {
+                    "HTTPPort": 80,
+                    "HTTPSPort": 443,
+                    "OriginProtocolPolicy": "http-only"
+                  }
+                }
+              ],
+              "DefaultCacheBehavior": {
+                "TargetOriginId": "ReactAppS3Origin",
+                "ViewerProtocolPolicy": "redirect-to-https",
+                "AllowedMethods": [
+                  "GET",
+                  "HEAD"
+                ],
+                "CachedMethods": [
+                  "GET",
+                  "HEAD"
+                ],
+                "ForwardedValues": {
+                  "QueryString": false,
+                  "Cookies": {
+                    "Forward": "none"
+                  }
+                },
+                "MinTTL": 0,
+                "DefaultTTL": 3600,
+                "MaxTTL": 86400
+              },
+              "ViewerCertificate": {
+                "CloudFrontDefaultCertificate": true
+              },
+              "HttpVersion": "http2"
+            }
+          }
+        },
+        "UserTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "UserTable",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "email",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "username",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "firstName_ls",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "lastName_ls",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST",
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "EmailIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "email",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "UsernameIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "username",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "FirstNameLSIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "firstName_ls",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "LastNameLSIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "lastName_ls",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        "StudentTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "StudentTable",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "userId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST",
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "UserIdIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "userId",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        "TrainerTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "TrainerTable",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "userId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "specializationId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST",
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "UserIdIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "userId",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "SpecializationIdIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "specializationId",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        "SpecializationTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "SpecializationTable",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "specialization",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST",
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "SpecializationIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "specialization",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        "TrainingTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "TrainingTable",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "trainerId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "studentId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "date",
+                "AttributeType": "N"
+              },
+              {
+                "AttributeName": "staticPartition",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST",
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "TrainerIdDateIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "trainerId",
+                    "KeyType": "HASH"
+                  },
+                  {
+                    "AttributeName": "date",
+                    "KeyType": "RANGE"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "StudentIdDateIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "studentId",
+                    "KeyType": "HASH"
+                  },
+                  {
+                    "AttributeName": "date",
+                    "KeyType": "RANGE"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "DateIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "staticPartition",
+                    "KeyType": "HASH"
+                  },
+                  {
+                    "AttributeName": "date",
+                    "KeyType": "RANGE"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        "TrainingTypeTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "TrainingTypeTable",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        }
+      },
+      "Outputs": {
+        "ReactAppCloudFrontDomainName": {
+          "Description": "CloudFront domain name for the frontend application",
+          "Value": {
+            "Fn::GetAtt": [
+              "ReactAppCloudFrontDistribution",
+              "DomainName"
+            ]
+          }
+        },
+        "UserPhotoCloudFrontDomainName": {
+          "Description": "CloudFront domain name for user avatars storage",
+          "Value": {
+            "Fn::GetAtt": [
+              "UserPhotoCloudFrontDistribution",
+              "DomainName"
+            ]
+          }
+        },
+        "HttpApi": {
+          "Description": "Reference to the created HTTP API",
+          "Value": {
+            "Ref": "HttpApi"
+          }
+        },
+        "ApiGatewayUrl": {
+          "Description": "HTTP API Gateway URL for backend",
+          "Value": {
+            "Fn::Sub": "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+          }
+        }
+      }
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless",
+    "initialServerlessConfig": {
+      "service": "final-project",
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      },
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      }
+    },
+    "appId": null,
+    "orgId": null,
+    "layers": {},
+    "artifact": "D:\\EPAM3\\final-project\\server\\.serverless\\final-project.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/final-project/dev/1751294456652-2025-06-30T14:40:56.652Z",
+    "artifact": "final-project.zip"
+  }
+}

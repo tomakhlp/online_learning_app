@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@layer components {
+    .themeToggle {
+        @apply flex justify-between gap-2 flex-wrap items-center px-3;
+    }
+
+    .themeIcon {
+        @apply w-5 h-5 text-(--color-body-200);
+    }
+
+    .themeLabel {
+        @apply flex items-center space-x-2;
+    }
+}

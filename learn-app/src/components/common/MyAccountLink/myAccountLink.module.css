@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer components {
+    .myAccountWrapper {
+        @apply p-3 flex items-center space-x-2;
+    }
+
+    .myAccountIcon {
+        @apply w-5 h-5 text-(--color-body-200);
+    }
+
+    .myAccountLink {
+        @apply text-(--color-body-200) text-sm leading-[22px] hover:text-(--color-primary-100);
+    }
+
+    .navLinkActive {
+        @apply font-bold text-(--color-primary-100);
+    }
+}
