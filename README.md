@@ -78,7 +78,7 @@ To run the project locally, follow these steps:
 
 ## Author
 This project was developed by **Tamara Khliupkina**
-[Git Repository](https://github.com/tomakhlp)
+[GitHub](https://github.com/tomakhlp)
 
 Feel free to contact me for suggestions or collaboration opportunities!
 
@@ -88,3 +88,4 @@ Please do not use, modify, or distribute the code without the author's permissio
 
 Thank you for understanding!
 © Tamara Khliupkina
+
